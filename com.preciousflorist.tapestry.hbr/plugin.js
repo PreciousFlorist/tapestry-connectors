@@ -173,49 +173,125 @@ function splitStreamEntries(html) {
 	return entries;
 }
 
-function parseEntry(block) {
+function findArticleLink(block) {
+	var linkExpression = /<a\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+
+	var match;
+
+	while ((match = linkExpression.exec(block)) !== null) {
+		var uri = absoluteHbrUrl(match[1]);
+		var title = htmlToText(match[2]);
+
+		/*
+		 * Normal HBR article URLs currently look like:
+		 * https://hbr.org/2026/09/article-slug
+		 *
+		 * This lets us identify the article link without depending
+		 * on HBR's heading classes or exact HTML nesting.
+		 */
+		if (uri && /^https:\/\/(?:www\.)?hbr\.org\/20\d{2}\/\d{2}\//i.test(uri) && title) {
+			return {
+				uri: uri,
+				title: title,
+			};
+		}
+	}
+
+	return null;
+}
+
+function findPublicationDate(block) {
+	/*
+	 * First try any <time> element in the stream entry.
+	 *
+	 * Do not depend on the surrounding li.pubdate structure because
+	 * HBR may return slightly different markup to different clients.
+	 */
+	var timeMatch = block.match(/<time\b([^>]*)>([\s\S]*?)<\/time>/i);
+
+	if (timeMatch) {
+		var dateValue = extractAttribute(timeMatch[1], "datetime") || htmlToText(timeMatch[2]);
+
+		var parsed = parseHbrDate(dateValue);
+
+		if (parsed && !isNaN(parsed.getTime())) {
+			return parsed;
+		}
+	}
+
+	/*
+	 * Fallback: search the visible text of the whole entry for an
+	 * English-language HBR publication date.
+	 */
+	var visibleText = htmlToText(block);
+
+	var dateMatch = visibleText.match(
+		/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}\b/i,
+	);
+
+	if (dateMatch) {
+		var fallbackDate = parseHbrDate(dateMatch[0]);
+
+		if (fallbackDate && !isNaN(fallbackDate.getTime())) {
+			return fallbackDate;
+		}
+	}
+
+	return null;
+}
+
+function parseEntry(block, index) {
 	var openingEnd = block.indexOf(">");
 	var openingTag = openingEnd >= 0 ? block.slice(0, openingEnd + 1) : "";
 
 	/*
-	 * Exclude HBR advertising and sponsored-content entries.
+	 * Skip advertising and sponsored entries.
 	 */
 	if (/stream-ad-container/i.test(block)) {
+		console.log("HBR entry " + index + ": skipped advertisement");
 		return null;
 	}
 
 	if (/\bclass\s*=\s*["'][^"']*\bsponsored\b[^"']*["']/i.test(openingTag)) {
+		console.log("HBR entry " + index + ": skipped sponsored content");
 		return null;
 	}
 
 	/*
-	 * Current HBR structure:
-	 *   <h3 class="hed"><a href="/...">Article title</a></h3>
+	 * Find the article using its URL rather than depending on
+	 * h3.hed or another specific heading structure.
 	 */
-	var titleMatch = block.match(
-		/<h3\b[^>]*\bclass\s*=\s*["'][^"']*\bhed\b[^"']*["'][^>]*>[\s\S]*?<a\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/i,
-	);
+	var article = findArticleLink(block);
 
-	if (!titleMatch) {
-		return null;
-	}
-
-	var uri = absoluteHbrUrl(titleMatch[1]);
-	var title = htmlToText(titleMatch[2]);
-
-	if (!uri || !title) {
+	if (!article) {
+		console.log("HBR entry " + index + ": no HBR article URL/title found");
 		return null;
 	}
 
 	/*
-	 * Preserve multiple authors when HBR provides them.
+	 * Publication date.
+	 */
+	var date = findPublicationDate(block);
+
+	if (!date) {
+		console.log("HBR entry " + index + ": no usable publication date found for " + article.uri);
+		return null;
+	}
+
+	/*
+	 * Authors.
+	 *
+	 * Retain the existing HBR byline-list parser, but authors are
+	 * optional so changes to the byline markup cannot kill the item.
 	 */
 	var authorName = "Harvard Business Review";
+
 	var bylineMatch = block.match(/<ul\b[^>]*\bclass\s*=\s*["'][^"']*\bbyline-list\b[^"']*["'][^>]*>([\s\S]*?)<\/ul>/i);
 
 	if (bylineMatch) {
 		var authors = [];
 		var authorExpression = /<li\b[^>]*>([\s\S]*?)<\/li>/gi;
+
 		var authorMatch;
 
 		while ((authorMatch = authorExpression.exec(bylineMatch[1])) !== null) {
@@ -232,49 +308,38 @@ function parseEntry(block) {
 	}
 
 	/*
-	 * Publication date.
-	 */
-	var dateMatch = block.match(
-		/<li\b[^>]*\bclass\s*=\s*["'][^"']*\bpubdate\b[^"']*["'][^>]*>[\s\S]*?<time\b([^>]*)>([\s\S]*?)<\/time>/i,
-	);
-
-	if (!dateMatch) {
-		return null;
-	}
-
-	var dateValue = extractAttribute(dateMatch[1], "datetime") || htmlToText(dateMatch[2]);
-
-	var date = parseHbrDate(dateValue);
-
-	/*
-	 * Do not substitute the current date if parsing fails. Doing so
-	 * would make old articles jump to the top after every refresh.
-	 */
-	if (!date || isNaN(date.getTime())) {
-		return null;
-	}
-
-	/*
-	 * HBR's short article description ("dek").
+	 * HBR's short article description.
+	 * Optional, so a changed description container cannot prevent
+	 * the article itself from being imported.
 	 */
 	var description = "";
-	var descriptionMatch = block.match(/<div\b[^>]*\bclass\s*=\s*["'][^"']*\bdek\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
+
+	var descriptionMatch = block.match(
+		/<(?:div|p)\b[^>]*\bclass\s*=\s*["'][^"']*\bdek\b[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|p)>/i,
+	);
 
 	if (descriptionMatch) {
 		description = htmlToText(descriptionMatch[1]);
 	}
 
-	var item = Item.createWithUriDate(uri, date);
+	/*
+	 * Create Tapestry item.
+	 */
+	var item = Item.createWithUriDate(article.uri, date);
 
-	item.title = title;
+	item.title = article.title;
 
 	if (description) {
 		item.body = "<p>" + escapeHtml(description) + "</p>";
 	}
 
 	var identity = Identity.createWithName(authorName);
+
 	identity.uri = "https://hbr.org";
+
 	item.author = identity;
+
+	console.log("HBR entry " + index + ": parsed " + article.title);
 
 	return item;
 }
@@ -292,11 +357,12 @@ function load() {
 	sendConditionalRequest(site, "GET", null, headers, false)
 		.then(function (html) {
 			if (html === null) {
-				processResults([]);
+				processResults(null);
 				return;
 			}
 
 			var entries = splitStreamEntries(html);
+			console.log("HBR: found " + entries.length + " stream entries");
 
 			if (entries.length === 0) {
 				throw new Error(
@@ -307,8 +373,7 @@ function load() {
 			var items = [];
 
 			for (var i = 0; i < entries.length; i++) {
-				var item = parseEntry(entries[i]);
-
+				var item = parseEntry(entries[i], i);
 				if (item) {
 					items.push(item);
 				}
