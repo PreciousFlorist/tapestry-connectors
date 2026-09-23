@@ -22,6 +22,8 @@ The connector does not include the RSS entry title, Lynn's comments, post metada
 
 The connector requests the public Strip Fix RSS feed, identifies each `<item>`, extracts the image whose URL belongs to `/strip_fix/strips/`, and exposes that image to Tapestry as a native media attachment.
 
+The feed and publisher use the website's favicon. The RSS endpoint is fixed even if the feed was created through Feed Finder using another page on the site.
+
 No login, credentials, subscriber data, or third-party service is used.
 
 ## Compatibility
