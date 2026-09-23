@@ -10,7 +10,7 @@
 
 var stripFeedUrl = "https://www.fborfw.com/strip_fix/feed/";
 var publisherUrl = "https://www.fborfw.com/";
-var publisherIconUrl = "https://www.fborfw.com/favicon.ico";
+var publisherIconUrl = "https://www.fborfw.com/images/favicon.png";
 
 function verify() {
 	processVerification({
