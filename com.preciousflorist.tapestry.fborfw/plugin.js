@@ -8,6 +8,18 @@
  * This connector intentionally keeps only the strip image for display.
  */
 
+var stripFeedUrl = "https://www.fborfw.com/strip_fix/feed/";
+var publisherUrl = "https://www.fborfw.com/";
+var publisherIconUrl = "https://www.fborfw.com/favicon.ico";
+
+function verify() {
+	processVerification({
+		displayName: "For Better or For Worse",
+		icon: publisherIconUrl,
+		baseUrl: publisherUrl,
+	});
+}
+
 function decodeXmlEntities(value) {
 	if (!value) {
 		return "";
@@ -186,6 +198,10 @@ function parseItem(block, index) {
 
 	attachment.text = "For Better or For Worse comic strip";
 	item.attachments = [attachment];
+	var publisher = Identity.createWithName("For Better or For Worse");
+	publisher.uri = publisherUrl;
+	publisher.avatar = publisherIconUrl;
+	item.author = publisher;
 
 	console.log("FBorFW item " + index + ": parsed " + imageUrl);
 	return item;
@@ -197,7 +213,8 @@ function load() {
 		"Accept-Language": "en-US,en;q=0.9",
 	};
 
-	sendConditionalRequest(site, "GET", null, headers, false)
+	/* A Feed Finder URL can override `site`; always request the actual RSS endpoint. */
+	sendConditionalRequest(stripFeedUrl, "GET", null, headers, false)
 		.then(function (xml) {
 			if (xml === null) {
 				processResults(null);
@@ -208,7 +225,8 @@ function load() {
 			console.log("FBorFW: found " + entries.length + " RSS items");
 
 			if (entries.length === 0) {
-				throw new Error("FBorFW returned an RSS document, but no <item> entries were found.");
+				console.log("FBorFW: source " + stripFeedUrl + ", response type " + typeof xml);
+				throw new Error("FBorFW feed contained no <item> entries. Check the source URL or try refreshing again.");
 			}
 
 			var results = [];
