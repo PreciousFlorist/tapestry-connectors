@@ -213,20 +213,20 @@ function load() {
 		"Accept-Language": "en-US,en;q=0.9",
 	};
 
-	/* A Feed Finder URL can override `site`; always request the actual RSS endpoint. */
-	sendConditionalRequest(stripFeedUrl, "GET", null, headers, false)
-		.then(function (xml) {
-			if (xml === null) {
-				processResults(null);
-				return;
-			}
+	/* Request the fixed endpoint and retain response metadata for diagnostics. */
+	sendRequest(stripFeedUrl, "GET", null, headers, true)
+		.then(function (responseText) {
+			var response = JSON.parse(responseText);
+			var xml = response.body || "";
+			var contentType = response.headers && (response.headers["content-type"] || response.headers["Content-Type"]);
+			console.log("FBorFW: HTTP " + response.status + ", type " + contentType + ", URL " + response.url + ", length " + xml.length);
 
 			var entries = splitItems(xml);
 			console.log("FBorFW: found " + entries.length + " RSS items");
 
 			if (entries.length === 0) {
-				console.log("FBorFW: source " + stripFeedUrl + ", response type " + typeof xml);
-				throw new Error("FBorFW feed contained no <item> entries. Check the source URL or try refreshing again.");
+				var prefix = String(xml).slice(0, 160).replace(/\s+/g, " ");
+				throw new Error("FBorFW received no RSS items (HTTP " + response.status + ", " + contentType + ", " + xml.length + " characters; starts: " + prefix + ")");
 			}
 
 			var results = [];
