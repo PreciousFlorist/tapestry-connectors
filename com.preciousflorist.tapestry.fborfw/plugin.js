@@ -198,10 +198,6 @@ function parseItem(block, index) {
 
 	attachment.text = "For Better or For Worse comic strip";
 	item.attachments = [attachment];
-	var publisher = Identity.createWithName("For Better or For Worse");
-	publisher.uri = publisherUrl;
-	publisher.avatar = publisherIconUrl;
-	item.author = publisher;
 
 	console.log("FBorFW item " + index + ": parsed " + imageUrl);
 	return item;
