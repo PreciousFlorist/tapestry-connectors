@@ -14,7 +14,10 @@ The test article is [The Verge subscription turns one](https://www.theverge.com/
 - Groups returned replies after their parent, with a reply-to label. Further pages and some deeper replies are omitted.
 - Refreshes the discussion when the Comments action is invoked.
 - Does not import subscriber articles, accept credentials, or post comments.
-- The article row is a demo description, not the article body.
+- Loads the public test article with all ten body paragraphs, links, byline, and lead image.
+- The Comments action preserves that article and displays comments below it, without replacing the article with a summary.
+- Uses post presentation so comment headers show their authors. Real avatars are shown when Coral supplies an avatar URL; otherwise Tapestry uses its default user image.
+- Includes The Verge favicon.
 
 This uses the same published persisted GraphQL operation as the public Coral widget, tested without authentication. The operation ID was found in Coral's 9.11.8 stream bundle and can change when the website updates. Authentication for restricted discussions is not implemented.
 
