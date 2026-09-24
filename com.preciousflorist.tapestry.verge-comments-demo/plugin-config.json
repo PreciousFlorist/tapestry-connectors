@@ -1,0 +1,10 @@
+{
+  "id": "com.preciousflorist.tapestry.verge-comments-demo",
+  "display_name": "The Verge (Comments Demo)",
+  "version": 1,
+  "minimum_app_version": "1.4",
+  "site": "https://www.theverge.com/bulletin/839889/the-verge-subscription-turns-one",
+  "service_name": "The Verge",
+  "item_style": "article",
+  "crosstalk": "disabled"
+}
