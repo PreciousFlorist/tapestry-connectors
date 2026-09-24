@@ -5,21 +5,71 @@
 var articleUrl = "https://www.theverge.com/bulletin/839889/the-verge-subscription-turns-one";
 var storyId = "dmcyOnBvc3Q6ODM5ODg5";
 var endpoint = "https://theverge.coral.coralproject.net/api/graphql";
+var publisherIcon = "https://www.theverge.com/static-assets/icons/favicon-96x96.png";
 
-function articleItem() {
-    var item = Item.createWithUriDate(articleUrl, new Date("2025-12-08T16:00:42Z"));
-    item.title = "The Verge subscription turns one: comments demo";
-    item.body = "<p>Open Comments to load a live discussion in Tapestry. This demo shows the first 10 top-level comments and the reply previews returned with them. It does not load the subscriber feed or the article body.</p>";
+function verify() {
+    processVerification({ displayName: "The Verge", icon: publisherIcon, baseUrl: "https://www.theverge.com/" });
+}
+
+function escapeHtml(value) {
+    return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function articleItem(html) {
+    var match = html.match(/<script\b[^>]*\bid="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/i);
+    if (!match) { throw new Error("The Verge article data was not found."); }
+    var data = JSON.parse(match[1]);
+    var responses = data.props.pageProps.hydration.responses;
+    var node = null;
+    responses.some(function (response) {
+        var candidate = response.data && response.data.node;
+        if (candidate && candidate.id === storyId && Array.isArray(candidate.blocks)) { node = candidate; return true; }
+        return false;
+    });
+    if (!node) { throw new Error("The demo article's content was not found."); }
+    if (node.isPaywallEligible) { throw new Error("This demo only imports the public test article. Subscriber articles require your subscriber feed."); }
+    var date = new Date(node.publishedAt);
+    if (isNaN(date.getTime())) { throw new Error("The article publication date is invalid."); }
+    var item = Item.createWithUriDate(articleUrl, date);
+    var authors = (node.authors || []).map(function (author) { return escapeHtml(author.name); }).join(", ");
+    var parts = ["<h2>" + escapeHtml(node.title) + "</h2>"];
+    if (authors) { parts.push("<p>By " + authors + "</p>"); }
+    var lede = node.ledeMedia && node.ledeMedia.image;
+    var image = lede || (node.featuredImage && node.featuredImage.image);
+    if (image) {
+        var imageUrl = image.originalUrl || (image.thumbnails && image.thumbnails.horizontal && image.thumbnails.horizontal.url);
+        if (imageUrl) { parts.push('<p><img src="' + escapeHtml(imageUrl) + '" alt="' + escapeHtml(image.alt || "") + '" /></p>'); }
+    }
+    var paragraphs = 0;
+    node.blocks.forEach(function (block) {
+        if (block.__typename === "CoreParagraphBlockType") {
+            parts.push("<p>" + block.paragraphContents.map(function (content) { return content.html; }).join("") + "</p>");
+            paragraphs++;
+        } else if (block.__typename !== "RelatedPostsBlockType") {
+            throw new Error("The demo article contains an unsupported block: " + block.__typename);
+        }
+    });
+    if (!paragraphs) { throw new Error("The article has no readable paragraphs."); }
+    item.body = parts.join("\n");
+    var publisher = Identity.createWithName("The Verge");
+    publisher.uri = "https://www.theverge.com/";
+    publisher.avatar = publisherIcon;
+    item.author = publisher;
     item.actions = { comments: storyId };
     return item;
 }
 
 function load() {
-    processResults([articleItem()]);
+    sendRequest(articleUrl, "GET", null, { Accept: "text/html" }, true).then(function (text) {
+        var response = JSON.parse(text);
+        if (response.status !== 200) { throw new Error("The Verge article request failed (HTTP " + response.status + ")."); }
+        processResults([articleItem(response.body)]);
+    }).catch(function (error) { processError(error); });
 }
 
-function commentItems(story) {
-    var results = [articleItem()];
+function commentItems(story, originalItem) {
+    // Keep the complete article at the top of the conversation without rewriting its body.
+    var results = [originalItem];
     var seen = {};
     var skipped = 0;
     function visit(connection) {
@@ -45,8 +95,6 @@ function commentItems(story) {
         });
     }
     visit(story.comments);
-    var total = story.commentCounts && story.commentCounts.totalPublished;
-    results[0].body = "<p>Live comment preview: " + (results.length - 1) + " comments loaded" + (typeof total === "number" ? " from " + total + " published comments" : "") + ". Includes up to 10 top-level comments, oldest first, with available reply previews. Further pages and some deeper replies are omitted.</p><p><a href=\"" + articleUrl + "\">Open the full discussion on The Verge</a></p>";
     console.log("Verge comments demo: " + (results.length - 1) + " comments, " + skipped + " unavailable entries skipped");
     return results;
 }
@@ -83,7 +131,7 @@ function performAction(actionId, actionValue, item) {
         if (!story || !story.comments || !Array.isArray(story.comments.edges)) {
             throw new Error("The Verge returned no readable comment connection for this article.");
         }
-        actionComplete(commentItems(story));
+        actionComplete(commentItems(story, item));
     }).catch(function (error) {
         actionComplete(null, error);
     });
