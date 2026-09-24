@@ -20,6 +20,12 @@ Uses the official Strip Fix RSS feed and turns each entry into an image-only Tap
 
 Source feed: https://www.fborfw.com/strip_fix/feed/
 
+### The Verge
+
+Folder: [`com.preciousflorist.tapestry.verge-comments-demo`](./com.preciousflorist.tapestry.verge-comments-demo/)
+
+Reads configurable subscriber or public RSS/Atom feeds, prefers feed artwork, and opens article-specific comments with nested replies. The original folder and ID are retained for upgrades; the fixed demo article has been removed. Enter personal subscriber URLs in Tapestry, never in this repository.
+
 ## Disclaimer
 
 These are unofficial community connectors. They are not affiliated with, endorsed by, or maintained by the respective publishers or The Iconfactory.
