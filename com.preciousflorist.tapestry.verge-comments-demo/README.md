@@ -10,8 +10,11 @@ The test article is [The Verge subscription turns one](https://www.theverge.com/
 
 ## Scope
 
-- Shows up to 10 top-level comments, oldest first, and the reply previews included by Coral.
-- Groups returned replies after their parent, with a reply-to label. Further pages and some deeper replies are omitted.
+- Shows the first 10 top-level comments, oldest first, and loads their descendant replies through Coral's published paginated reply operation. Later top-level discussions are still outside this demo.
+- Groups replies after their actual parent, including replies to replies, with a reply-to label.
+- Comments with replies have their own Comments action to open that smaller conversation.
+- Each comment body includes a publication date, time (including seconds), and timezone, formatted using the runtime locale. The original Item date is preserved.
+- Loads reply pages of 100, with a 20-page limit per thread. A failed or stalled page reports an error instead of silently showing an incomplete thread.
 - Refreshes the discussion when the Comments action is invoked.
 - Does not import subscriber articles, accept credentials, or post comments.
 - Loads the public test article with all ten body paragraphs, links, byline, and lead image.
@@ -21,6 +24,6 @@ The test article is [The Verge subscription turns one](https://www.theverge.com/
 
 This uses the same published persisted GraphQL operation as the public Coral widget, tested without authentication. The operation ID was found in Coral's 9.11.8 stream bundle and can change when the website updates. Authentication for restricted discussions is not implemented.
 
-The HTTP request and comment conversion were tested locally against a live response. Installation and native rendering still need testing in Tapestry or Loom.
+The HTTP requests and comment conversion were tested locally against live responses: 41 readable comments, including 19 replies to replies. Pagination, duplicate prevention, parent ordering, timestamps, and article preservation were also checked. Installation and native rendering still need testing in Tapestry or Loom.
 
 Requires the Tapestry 1.4+ connector API. Unofficial and not affiliated with The Verge, Vox Media, Coral, or The Iconfactory.
