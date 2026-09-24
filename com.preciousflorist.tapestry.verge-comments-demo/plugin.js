@@ -67,15 +67,6 @@ function load() {
     }).catch(function (error) { processError(error); });
 }
 
-function publishedTimestamp(date) {
-    try {
-        return date.toLocaleString(undefined, {
-            year: "numeric", month: "short", day: "numeric",
-            hour: "numeric", minute: "2-digit", second: "2-digit", timeZoneName: "short"
-        });
-    } catch (_) { return date.toISOString().replace("T", " ").replace("Z", " UTC"); }
-}
-
 function commentItems(story, originalItem) {
     var results = [originalItem];
     var nodes = Object.create(null);
@@ -106,7 +97,7 @@ function commentItems(story, originalItem) {
         var date = new Date(comment.createdAt);
         if (!comment.deleted && comment.body && !isNaN(date.getTime())) {
             var item = Item.createWithUriDate(articleUrl + "?commentID=" + encodeURIComponent(id), date);
-            item.body = "<p><small>Published " + escapeHtml(publishedTimestamp(date)) + "</small></p>\n" + comment.body;
+            item.body = comment.body;
             var author = comment.author || {};
             var identity = Identity.createWithName(author.username || "Unknown commenter");
             if (author.avatar) { identity.avatar = author.avatar; }
