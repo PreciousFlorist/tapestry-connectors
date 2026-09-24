@@ -1,3 +1,16 @@
 {
-  "sites": ["theverge.com", "www.theverge.com"]
+  "sites": [
+    "theverge.com",
+    "www.theverge.com"
+  ],
+  "xml": [
+    {
+      "root": "feed",
+      "with": "title"
+    },
+    {
+      "root": "rss",
+      "with": "channel"
+    }
+  ]
 }
