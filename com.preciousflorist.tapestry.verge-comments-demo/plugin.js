@@ -10,7 +10,7 @@ function articleItem() {
     var item = Item.createWithUriDate(articleUrl, new Date("2025-12-08T16:00:42Z"));
     item.title = "The Verge subscription turns one: comments demo";
     item.body = "<p>Open Comments to load a live discussion in Tapestry. This demo shows the first 10 top-level comments and the reply previews returned with them. It does not load the subscriber feed or the article body.</p>";
-    item.actions.add("comments");
+    item.actions = { comments: storyId };
     return item;
 }
 
