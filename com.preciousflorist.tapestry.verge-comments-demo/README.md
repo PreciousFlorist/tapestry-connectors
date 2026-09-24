@@ -1,29 +1,19 @@
-# The Verge comments proof of concept
+The Verge feeds with comments
 
-A read-only demonstration of opening live Verge comments in Tapestry's native conversation view.
+Add this connector, choose Create a Feed, and paste your full subscriber RSS URL from The Verge. Repeat for each newsletter or other Verge feed. A public feed URL also works, but can only show the content included in that public feed. Do not paste an article URL or the homepage.
 
-## Try it
+Articles use the HTML provided by your RSS or Atom feed, including its text, links, images, and supported media. Atom content is preferred over its summary; RSS content:encoded is preferred over description. No article-body scraping or subscription bypass is performed. Tapestry determines which HTML and embedded assets it can render.
 
-Install this connector, then select **Create a Feed**. It needs no login or subscriber URL. Open this feed on its own: the single demo entry has the article's original December 8, 2025 date, so it will be far back in a combined timeline. Use its **Comments** action (the conversation/details control or swipe menu).
+Feed artwork is preferred in this order: Atom icon, Atom logo, RSS channel image, iTunes image, then The Verge favicon. Both feed verification and article publisher avatars use that artwork. The installable connector itself retains a generic Verge favicon because no individual feed has been configured yet.
 
-The test article is [The Verge subscription turns one](https://www.theverge.com/bulletin/839889/the-verge-subscription-turns-one). This older discussion is closed to new comments but readable.
+Use an article's Comments action to load its own Coral discussion. Replies are grouped after their parents, with reply-to labels, usernames, and source avatars when available. Comments with replies have their own Comments action. Comment bodies have no added publication line; Tapestry formats the original date and time in its header.
 
-## Scope
+Top-level comments now paginate beyond the former 10-discussion demo limit. Missing reply pages load when necessary. Limits are 20 pages of 50 top-level comments and 20 pages of 100 descendants per expanded thread. If pagination fails or reaches a limit, the connector reports an error instead of silently presenting an incomplete discussion. Comments load anonymously using Coral's published operations; restricted discussions may require opening the website. This connector does not sign in to Coral or post comments.
 
-- Shows the first 10 top-level comments, oldest first, and loads their descendant replies through Coral's published paginated reply operation. Later top-level discussions are still outside this demo.
-- Groups replies after their actual parent, including replies to replies, with a reply-to label.
-- Comments with replies have their own Comments action to open that smaller conversation.
-- Comment bodies contain only the original comment HTML. The original publication date and time remain on the Item; Tapestry controls the native header's date formatting, with no documented connector override.
-- Loads reply pages of 100, with a 20-page limit per thread. A failed or stalled page reports an error instead of silently showing an incomplete thread.
-- Refreshes the discussion when the Comments action is invoked.
-- Does not import subscriber articles, accept credentials, or post comments.
-- Loads the public test article with all ten body paragraphs, links, byline, and lead image.
-- The Comments action preserves that article and displays comments below it, without replacing the article with a summary.
-- Uses post presentation so comment headers show their authors. Real avatars are shown when Coral supplies an avatar URL; otherwise Tapestry uses its default user image.
-- Includes The Verge favicon.
+Upgrading from the demo: the connector keeps its original internal ID and folder so it can update in place. Its name is now The Verge (Feeds + Comments). Create new feeds with your subscriber URLs, then remove the old demo feed from Tapestry's Feeds settings to clear its cached test article. The connector no longer loads a fixed test article.
 
-This uses the same published persisted GraphQL operation as the public Coral widget, tested without authentication. The operation ID was found in Coral's 9.11.8 stream bundle and can change when the website updates. Authentication for restricted discussions is not implemented.
+Your subscriber URL is entered and retained by Tapestry as feed configuration. It is not embedded in these public files or sent in Coral comment requests. Treat that personal URL as private. Feed-download errors avoid echoing it.
 
-The HTTP requests and comment conversion were tested locally against live responses: 41 readable comments, including 19 replies to replies. Pagination, duplicate prevention, parent ordering, publication dates, and article preservation were also checked. Installation and native rendering still need testing in Tapestry or Loom.
+Validation: live public Atom feed conversion and current article-to-Coral lookup, plus RSS full-content, XHTML, icon precedence, nested actions, pagination, and error-redaction fixtures. Private subscriber feed content and native rendering need validation in Tapestry with your own URL.
 
-Requires the Tapestry 1.4+ connector API. Unofficial and not affiliated with The Verge, Vox Media, Coral, or The Iconfactory.
+Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or The Iconfactory. Coral's persisted operations are from its published 9.11.8 stream bundle and may change.
