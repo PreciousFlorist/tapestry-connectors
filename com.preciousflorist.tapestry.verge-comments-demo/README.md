@@ -4,7 +4,7 @@ Add this connector, choose Create a Feed, and paste your full subscriber RSS URL
 
 Articles use the HTML provided by your RSS or Atom feed, including its text, links, images, and supported media. Atom content is preferred over its summary; RSS content:encoded is preferred over description. No article-body scraping or subscription bypass is performed. Tapestry determines which HTML and embedded assets it can render.
 
-Feed artwork is preferred in this order: Atom icon, Atom logo, RSS channel image, iTunes image, then The Verge favicon. Both feed verification and article publisher avatars use that artwork. The installable connector itself retains a generic Verge favicon because no individual feed has been configured yet.
+Feed artwork is preferred in this order: Atom icon, Atom logo, RSS channel image, iTunes image, then The Verge favicon. Feed verification supplies that artwork; articles leave their author identity unset so Tapestry can use the feed's customized name and icon. The installable connector itself retains a generic Verge favicon because no individual feed has been configured yet.
 
 Use an article's Comments action to load its own Coral discussion. Replies are grouped after their parents, with reply-to labels, usernames, and source avatars when available. Comments with replies have their own Comments action. Comment bodies have no added publication line; Tapestry formats the original date and time in its header.
 
@@ -17,3 +17,5 @@ Your subscriber URL is entered and retained by Tapestry as feed configuration. I
 Validation: live public Atom feed conversion and current article-to-Coral lookup, plus RSS full-content, XHTML, icon precedence, nested actions, pagination, and error-redaction fixtures. Private subscriber feed content and native rendering need validation in Tapestry with your own URL.
 
 Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or The Iconfactory. Coral's persisted operations are from its published 9.11.8 stream bundle and may change.
+
+Version 8 removes the artificial article-author label containing the original RSS feed title. Set your preferred name under Customize Feed > Name. The separate service name is hidden by default; if you previously selected Visible explicitly, set Customize Feed > Service Name to Hidden. Refresh after updating to regenerate article items. Comment usernames and avatars are preserved. Native header rendering still needs confirmation in Tapestry.
