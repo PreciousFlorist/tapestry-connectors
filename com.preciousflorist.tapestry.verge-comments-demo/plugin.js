@@ -76,7 +76,7 @@ function feedItems(feed) {
             : textValue(entry["content:encoded"]) || textValue(entry.description);
         var byline = feed.atom ? list(entry.author).map(function (a) { return textValue(a.name); }).filter(Boolean).join(", ")
             : list(entry["dc:creator"] || entry.author).map(textValue).filter(Boolean).join(", ");
-        item.body = (title ? "<h2>" + title + "</h2>\n" : "") + (byline ? "<p>By " + escapeHtml(byline) + "</p>\n" : "") + body;
+        item.body = (title ? "<p><strong>" + title + "</strong></p>\n" : "") + (byline ? "<p>By " + escapeHtml(byline) + "</p>\n" : "") + body;
         // This input is stored independently for each configured feed by Tapestry.
         var headerName = typeof articleHeaderName === "string" ? articleHeaderName.trim() : "";
         var publisher = Identity.createWithName(headerName || feed.name);
