@@ -2,7 +2,7 @@ The Verge feeds with comments
 
 Add this connector, choose Create a Feed, and paste your full subscriber RSS URL from The Verge. Repeat for each newsletter or other Verge feed. A public feed URL also works, but can only show the content included in that public feed. Do not paste an article URL or the homepage.
 
-Set Article header name separately for each feed, for example The Verge - Optimizer. This controls the article's timeline header; leaving it blank uses the RSS/Atom feed title. Tapestry's existing Appearance > Name field remains independent. Keep Display Style on Default and Service Name on Default (Hidden) or Hidden. After changing the header name, save and refresh the feed, then reopen Comments.
+Set Article header name separately for each feed, for example The Verge - Optimizer. This controls the article's timeline header and defaults to The Verge. Use a non-empty name when customizing it; Tapestry may block setup or saving for empty text inputs. Tapestry's existing Appearance > Name field remains independent. Keep Display Style on Default and Service Name on Default (Hidden) or Hidden. After changing the header name, save and refresh the feed, then reopen Comments.
 
 Articles use the HTML provided by your RSS or Atom feed, including its text, links, images, and supported media. Atom content is preferred over its summary; RSS content:encoded is preferred over description. No article-body scraping or subscription bypass is performed. Tapestry determines which HTML and embedded assets it can render.
 
@@ -21,3 +21,5 @@ Validation: live public Atom feed conversion and current article-to-Coral lookup
 Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or The Iconfactory. Coral's persisted operations are from its published 9.11.8 stream bundle and may change.
 
 Version 10 uses post layout with an explicit article publisher identity, combining the per-feed Article header name with the feed artwork. Comments retain their own author identities and reply-to labels, without receiving the article header name. This replaces the v8/v9 layout experiments. Native rendering still needs checking in Tapestry.
+
+Version 11 gives Article header name a non-empty default to address the disabled Add Feed button observed with v10. If upgrading while the setup sheet is open, close it and start a fresh Create a Feed flow. After adding the feed, edit Article header name in Customize Feed. This setup correction needs native confirmation; the feed URL handling is unchanged.
