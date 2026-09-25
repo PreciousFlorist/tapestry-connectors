@@ -25,3 +25,5 @@ Version 10 uses post layout with an explicit article publisher identity, combini
 Version 11 gives Article header name a non-empty default to address the disabled Add Feed button observed with v10. If upgrading while the setup sheet is open, close it and start a fresh Create a Feed flow. After adding the feed, edit Article header name in Customize Feed. This setup correction needs native confirmation; the feed URL handling is unchanged.
 
 Version 12 renders the article headline as a bold paragraph using Tapestry's supported strong tag. The timeline does not style h2 headings. This changes only headline markup, leaving publisher identities, bylines, article content, and comments unchanged.
+
+Version 13 moves article headlines into Tapestry's native item.title field and removes the injected headline paragraph. Post layout, per-feed publisher names and artwork, body bylines, and comment identities remain unchanged. Fixture checks verify title separation and preserved comments; native headline rendering still needs confirmation in Tapestry.
