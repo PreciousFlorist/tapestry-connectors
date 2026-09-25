@@ -77,7 +77,8 @@ function feedItems(feed) {
         var byline = feed.atom ? list(entry.author).map(function (a) { return textValue(a.name); }).filter(Boolean).join(", ")
             : list(entry["dc:creator"] || entry.author).map(textValue).filter(Boolean).join(", ");
         if (title) { item.title = title; }
-        item.body = (byline ? "<p>By " + escapeHtml(byline) + "</p>\n" : "") + body;
+        item.body = body;
+        if (byline) { item.annotations = [Annotation.createWithText("by " + byline)]; }
         // This input is stored independently for each configured feed by Tapestry.
         var headerName = typeof articleHeaderName === "string" ? articleHeaderName.trim() : "";
         var publisher = Identity.createWithName(headerName || feed.name);
@@ -87,15 +88,31 @@ function feedItems(feed) {
         // Preserve body images for Tapestry's automatic media extraction. Add separate enclosures only when needed.
         if (!/<(?:img|video|audio)\b/i.test(body)) {
             var media = list(entry["enclosure$attrs"]).concat(list(entry["media:content$attrs"]));
-            if (feed.atom) { media = media.concat(list(entry.link$attrs).filter(function (a) { return a.rel === "enclosure"; })); }
-            var attachments = [];
-            media.forEach(function (m) {
-                var mediaUrl = webUrl(m.url || m.href, url);
-                if (!mediaUrl || !/^(image|audio|video)\//.test(m.type || "")) { return; }
-                var attachment = MediaAttachment.createWithUrl(mediaUrl);
-                attachment.mimeType = m.type;
-                attachments.push(attachment);
+            list(entry["media:group"]).forEach(function (group) {
+                media = media.concat(list(group["media:content$attrs"]));
             });
+            if (feed.atom) { media = media.concat(list(entry.link$attrs).filter(function (a) { return a.rel === "enclosure"; })); }
+            var thumbnails = list(entry["media:thumbnail$attrs"]);
+            list(entry["media:group"]).forEach(function (group) {
+                thumbnails = thumbnails.concat(list(group["media:thumbnail$attrs"]));
+            });
+            var attachments = [], mediaSeen = Object.create(null);
+            function addMedia(m, thumbnail) {
+                var mediaUrl = webUrl(m.url || m.href, url);
+                if (!mediaUrl || mediaSeen[mediaUrl]) { return; }
+                var type = textValue(m.type).toLowerCase();
+                var knownExtension = /\.(?:jpe?g|png|gif|webp|avif|heic|mp4|m4v|mov|webm|mp3|m4a|aac|wav|ogg)(?:[?#]|$)/i.test(mediaUrl);
+                if (!thumbnail && !/^(image|audio|video)\//.test(type) && !(knownExtension && (!type || type === "application/octet-stream"))) { return; }
+                var attachment = MediaAttachment.createWithUrl(mediaUrl);
+                if (/^(image|audio|video)\//.test(type)) { attachment.mimeType = type; }
+                var width = Number(m.width), height = Number(m.height);
+                if (width > 0 && height > 0) { attachment.aspectSize = { width: width, height: height }; }
+                if (textValue(m.description)) { attachment.text = textValue(m.description); }
+                mediaSeen[mediaUrl] = true;
+                attachments.push(attachment);
+            }
+            media.forEach(function (m) { addMedia(m, false); });
+            if (!attachments.length) { thumbnails.forEach(function (m) { addMedia(m, true); }); }
             if (attachments.length) { item.attachments = attachments; }
         }
         if (isVergeArticle(url)) { item.actions = { comments: JSON.stringify({ articleUrl: url }) }; }
