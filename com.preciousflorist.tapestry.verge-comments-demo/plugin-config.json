@@ -1,7 +1,7 @@
 {
   "id": "com.preciousflorist.tapestry.verge-comments-demo",
   "display_name": "The Verge (Feeds + Comments)",
-  "version": 12,
+  "version": 13,
   "minimum_app_version": "1.4",
   "service_name": "The Verge",
   "item_style": "post",
