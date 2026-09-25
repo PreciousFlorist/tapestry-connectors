@@ -1,7 +1,7 @@
 {
   "id": "com.preciousflorist.tapestry.verge-comments-demo",
   "display_name": "The Verge (Feeds + Comments)",
-  "version": 7,
+  "version": 8,
   "minimum_app_version": "1.4",
   "service_name": "The Verge",
   "item_style": "post",
@@ -10,5 +10,6 @@
   "needs_verification": true,
   "site_prompt": "Subscriber Feed URL",
   "site_placeholder": "Paste your full Verge RSS feed URL",
-  "site_help": "Copy a subscriber RSS URL from The Verge. Add a separate feed for each URL. Your personal URL is saved in Tapestry, not in the connector repository."
+  "site_help": "Copy a subscriber RSS URL from The Verge. Add a separate feed for each URL. Your personal URL is saved in Tapestry, not in the connector repository.",
+  "default_service_name_visibility": "hidden"
 }
