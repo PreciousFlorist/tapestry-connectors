@@ -19,3 +19,5 @@ Validation: live public Atom feed conversion and current article-to-Coral lookup
 Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or The Iconfactory. Coral's persisted operations are from its published 9.11.8 stream bundle and may change.
 
 Version 8 removes the artificial article-author label containing the original RSS feed title. Set your preferred name under Customize Feed > Name. The separate service name is hidden by default; if you previously selected Visible explicitly, set Customize Feed > Service Name to Hidden. Refresh after updating to regenerate article items. Comment usernames and avatars are preserved. Native header rendering still needs confirmation in Tapestry.
+
+Version 9 switches the connector's default layout from post to article, matching the authorless For Better or For Worse feed. This is intended to use the feed icon alongside its custom name instead of a generic person avatar. Keep Customize Feed > Display Style on Default. The layout applies at connector level, so native comment header presentation also needs checking; comment identities and avatar URLs are still returned unchanged.
