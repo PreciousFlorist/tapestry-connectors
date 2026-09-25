@@ -23,3 +23,5 @@ Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or 
 Version 10 uses post layout with an explicit article publisher identity, combining the per-feed Article header name with the feed artwork. Comments retain their own author identities and reply-to labels, without receiving the article header name. This replaces the v8/v9 layout experiments. Native rendering still needs checking in Tapestry.
 
 Version 11 gives Article header name a non-empty default to address the disabled Add Feed button observed with v10. If upgrading while the setup sheet is open, close it and start a fresh Create a Feed flow. After adding the feed, edit Article header name in Customize Feed. This setup correction needs native confirmation; the feed URL handling is unchanged.
+
+Version 12 renders the article headline as a bold paragraph using Tapestry's supported strong tag. The timeline does not style h2 headings. This changes only headline markup, leaving publisher identities, bylines, article content, and comments unchanged.
