@@ -1,0 +1,11 @@
+{
+  "inputs": [
+    {
+      "name": "articleHeaderName",
+      "type": "text",
+      "prompt": "Article header name",
+      "placeholder": "Optional: e.g. The Verge - Optimizer",
+      "value": ""
+    }
+  ]
+}
