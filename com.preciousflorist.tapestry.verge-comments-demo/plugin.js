@@ -77,8 +77,12 @@ function feedItems(feed) {
         var byline = feed.atom ? list(entry.author).map(function (a) { return textValue(a.name); }).filter(Boolean).join(", ")
             : list(entry["dc:creator"] || entry.author).map(textValue).filter(Boolean).join(", ");
         item.body = (title ? "<h2>" + title + "</h2>\n" : "") + (byline ? "<p>By " + escapeHtml(byline) + "</p>\n" : "") + body;
-        // Leave the article author unset so Tapestry can use the customized feed name and icon.
-        // Actual article authors remain in the body byline; comments retain their own identities.
+        // This input is stored independently for each configured feed by Tapestry.
+        var headerName = typeof articleHeaderName === "string" ? articleHeaderName.trim() : "";
+        var publisher = Identity.createWithName(headerName || feed.name);
+        publisher.uri = feed.base;
+        publisher.avatar = feed.icon;
+        item.author = publisher;
         // Preserve body images for Tapestry's automatic media extraction. Add separate enclosures only when needed.
         if (!/<(?:img|video|audio)\b/i.test(body)) {
             var media = list(entry["enclosure$attrs"]).concat(list(entry["media:content$attrs"]));
