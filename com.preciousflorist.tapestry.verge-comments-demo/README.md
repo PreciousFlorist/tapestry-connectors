@@ -2,9 +2,11 @@ The Verge feeds with comments
 
 Add this connector, choose Create a Feed, and paste your full subscriber RSS URL from The Verge. Repeat for each newsletter or other Verge feed. A public feed URL also works, but can only show the content included in that public feed. Do not paste an article URL or the homepage.
 
+Set Article header name separately for each feed, for example The Verge - Optimizer. This controls the article's timeline header; leaving it blank uses the RSS/Atom feed title. Tapestry's existing Appearance > Name field remains independent. Keep Display Style on Default and Service Name on Default (Hidden) or Hidden. After changing the header name, save and refresh the feed, then reopen Comments.
+
 Articles use the HTML provided by your RSS or Atom feed, including its text, links, images, and supported media. Atom content is preferred over its summary; RSS content:encoded is preferred over description. No article-body scraping or subscription bypass is performed. Tapestry determines which HTML and embedded assets it can render.
 
-Feed artwork is preferred in this order: Atom icon, Atom logo, RSS channel image, iTunes image, then The Verge favicon. Feed verification supplies that artwork; articles leave their author identity unset so Tapestry can use the feed's customized name and icon. The installable connector itself retains a generic Verge favicon because no individual feed has been configured yet.
+Feed artwork is preferred in this order: Atom icon, Atom logo, RSS channel image, iTunes image, then The Verge favicon. Feed verification and article publisher avatars use that artwork. The installable connector itself retains a generic Verge favicon because no individual feed has been configured yet.
 
 Use an article's Comments action to load its own Coral discussion. Replies are grouped after their parents, with reply-to labels, usernames, and source avatars when available. Comments with replies have their own Comments action. Comment bodies have no added publication line; Tapestry formats the original date and time in its header.
 
@@ -18,6 +20,4 @@ Validation: live public Atom feed conversion and current article-to-Coral lookup
 
 Requires Tapestry 1.4+. Unofficial and not affiliated with The Verge, Coral, or The Iconfactory. Coral's persisted operations are from its published 9.11.8 stream bundle and may change.
 
-Version 8 removes the artificial article-author label containing the original RSS feed title. Set your preferred name under Customize Feed > Name. The separate service name is hidden by default; if you previously selected Visible explicitly, set Customize Feed > Service Name to Hidden. Refresh after updating to regenerate article items. Comment usernames and avatars are preserved. Native header rendering still needs confirmation in Tapestry.
-
-Version 9 switches the connector's default layout from post to article, matching the authorless For Better or For Worse feed. This is intended to use the feed icon alongside its custom name instead of a generic person avatar. Keep Customize Feed > Display Style on Default. The layout applies at connector level, so native comment header presentation also needs checking; comment identities and avatar URLs are still returned unchanged.
+Version 10 uses post layout with an explicit article publisher identity, combining the per-feed Article header name with the feed artwork. Comments retain their own author identities and reply-to labels, without receiving the article header name. This replaces the v8/v9 layout experiments. Native rendering still needs checking in Tapestry.
